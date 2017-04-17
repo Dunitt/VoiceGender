@@ -37,6 +37,7 @@ knnTraining <- dataTraining
 knnTraining$gender <- NULL
 # En general con l = 3 funciona mejor, pero deja muchos casos sin clasificar.
 kvecinos <- knn(knnTraining, dataTestF, cl, k = 3, l = 0)
+
 A1 <- confusionMatrix(table(kvecinos, dataTest$gender))
 # A1$overall[1]
 print("KNN [l = 3]")
@@ -61,7 +62,7 @@ print(summary(arbol))
 # }
 
 
-# Desconozco la utilidad de "importance" y "proximity".
+# Desconozco la utilidad de "norm.votes".
 tree <- randomForest(gender~., dataTraining, importance = TRUE, proximity = TRUE,  ntree = 20, norm.votes = FALSE)
 A3 <- confusionMatrix(table(predict(tree, dataTestF, type = "class"), dataTest$gender))
 # A3$overall[1]
