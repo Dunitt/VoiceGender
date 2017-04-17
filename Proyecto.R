@@ -36,12 +36,12 @@ cl <- dataTraining$gender
 knnTraining <- dataTraining
 knnTraining$gender <- NULL
 # En general con l = 3 funciona mejor, pero deja muchos casos sin clasificar.
-kvecinos <- knn(knnTraining, dataTestF, cl, k = 3, l = 0)
+kvecinos.model <- knn(knnTraining, dataTestF, cl, k = 3, l = 0)
 
-A1 <- confusionMatrix(table(kvecinos, dataTest$gender))
+kvecinos.confusion <- confusionMatrix(table(kvecinos, dataTest$gender))
 # A1$overall[1]
 print("KNN [l = 3]")
-print(A1$overall[1])
+print(kvecinos.confusion$overall[1])
 
 # -C Umbral de confianza para podar. (0.25)
 # -M Mínimo de instancias por hoja. (2)
