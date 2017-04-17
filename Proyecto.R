@@ -95,7 +95,8 @@ print("SVM")
 print(A4$overall[1])
 
 
-
+# Seguro este método sumará puntos con el profesor, porque él dijo que tenía un error
+# y nosotros lo tenemos funcionando.
 # Nuevo método agregado, si quieres dedicar tiempo a probar los parámetros sería genial.
 # Desconozco la utilidad del parámetro "laplace", pero afecta notablemente la precisión.
 naiveBayes.model <- naiveBayes(gender~., dataTraining, laplace = 4)
@@ -103,6 +104,9 @@ A5 <- confusionMatrix(table(predict(naiveBayes.model, dataTestF, type = "class")
 print("NAIVE BAYES")
 print(A5$overall[1])
 
+
+# No sé por qué, pero no me agradan los números impares, 
+# si el tiempo me alcanza -lo dudo-, agrego un nuevo método.
 
 
 # Conclusión: Usaremos Random Forest
