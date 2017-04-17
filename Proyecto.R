@@ -86,7 +86,7 @@ print(sum(diag(mt))/sum(mt))
 # kernel:
 # linear: u'v
 # polynomial: (γu'v + coef0)^degree
-# radial basis: (e − γ|u − v|^2)
+# radial basis: e^(− γ|u − v|^2)
 # sigmoid: tanh(γu'v + coef0)
 svm.model <- svm(gender~., dataTraining, kernel = "radial", cost = 62.5, gamma = 0.5, coef0 = 3, degree = 3)
 A4 <- confusionMatrix(table(predict(svm.model, dataTestF, type = "class"), dataTest$gender))
