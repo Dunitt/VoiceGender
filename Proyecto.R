@@ -80,9 +80,9 @@ print(sum(diag(mt))/sum(mt))
 # No se observa una diferencia significativa entre los tipos de kernel,
 # excepto por "sigmoid" que degrada notablemente la precisión.
 # (Con "radial" se obtiene el mejor resultado)
-# degree parameter needed for kernel of type polynomial (default: 3)
-# gamma parameter needed for all kernels except linear (default: 1/(data dimension))
-# coef0 parameter needed for kernels of type polynomial and sigmoid (default: 0)
+# degree parámetro necesario para el kernel polinomial (por defecto: 3)
+# gamma parámetro necesario para todos los kernels, excepto el lineal (por defecto: 1/(data dimension))
+# coef0 parámetro necesario para los kernels polinomial y sigmoid (por defecto: 0)
 # kernel:
 # linear: u'v
 # polynomial: (γu'v + coef0)^degree
