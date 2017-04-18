@@ -1,12 +1,4 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
+#Incluímos las librerias necesarias por el servidor
 library(shiny)
 library(rpart.plot)
 library(rmarkdown)
@@ -23,12 +15,10 @@ library(C50)
 library(shinythemes)
 library(ggvis)
 
-#setwd("~/Escritorio/Voicelabel")
 
 # Cargamos la data:
-data <- read.csv(file = "./data/voice.csv", header = TRUE)
-#rm.outlier(data, fill = FALSE, median = FALSE, opposite = FALSE)
-#data <- raw
+data <- read.csv(file = "../data/voice.csv", header = TRUE)
+
 # Particionamos el dataset: 70% para entrenamiento y 30% para pruebas (esto se puede modificar para probar la precisión)
 particion <- createDataPartition(y = data$label, p = 0.7, list = FALSE, times = 1)
 dataTraining <- data[particion,]
@@ -39,8 +29,6 @@ cl <- dataTraining$label
 knnTraining <- dataTraining
 knnTraining$label <- NULL
 
-
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
    output$summary <- renderPrint({
@@ -63,7 +51,7 @@ shinyServer(function(input, output) {
 	
 	
   output$resumen <- renderPrint({
-  
+	#Muestra ek resumen adecuado para cada algoritmo
     if(input$type_algorithms == "enable_KNN"){
     	kvecinos <- knn(knnTraining, dataTestF, cl, k = input$number_neighbours, l = 0)
 		A1 <- confusionMatrix(table(kvecinos, dataTest$label))
@@ -103,10 +91,10 @@ shinyServer(function(input, output) {
   
   output$table1 <- renderTable({
     dataTestF[input$instance,]
-  },width ="auto")
+  })
   
   output$text1 <- renderText({
-    
+	#Muestra la clasiificación de acuerdo al algoritmo seleccionado
 	if(input$type_algorithms == "enable_KNN"){
 		kvecinos <- knn(knnTraining, dataTestF[input$instance,], cl, k = input$number_neighbours, l = 0)
 		paste("La instancia se clasificó como:", kvecinos)

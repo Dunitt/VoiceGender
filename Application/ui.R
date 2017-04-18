@@ -1,67 +1,28 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
+#Incluimos las librerias necesarias por el cliente
 library(ggvis)
 library(shiny)
 library(shinythemes)
 
-# Define UI for application that draws a histogram
+#Aquí comienza el cliente
 shinyUI(fluidPage(
 
   titlePanel("RECONOCIMIENTO DE GÉNERO POR VOZ"), theme = shinytheme("flatly"),
   
   
-  # # Some custom CSS
-  # tags$head(
-  #   tags$style(HTML("
-  #       /* Smaller font for preformatted text */
-  #       pre, table.table {
-  #         font-size: smaller;
-  #       }
-  # 
-  #       body {
-  #         min-height: 2000px;
-  #       }
-  # 
-  #       .option-group {
-  #         border: 1px solid #ccc;
-  #         border-radius: 6px;
-  #         padding: 0px 5px;
-  #         margin: 5px -10px;
-  #         background-color: #f5f5f5;
-  #       }
-  # 
-  #       .option-header {
-  #         color: #79d;
-  #         text-transform: uppercase;
-  #         margin-bottom: 5px;
-  #       }
-  #     "))
-  # ),
-  # shinythemes::shinytheme("flatly"),
-  
-  # Application title
-  # titlePanel("Reconocimiento de género por voz"),
   h3("Análisis exploratorio"),
   
   tabsetPanel(type = "tabs", 
-        tabPanel("Plot", plotOutput("plot")), 
-        tabPanel("Summary", verbatimTextOutput("summary")), 
-        tabPanel("Table", tableOutput("table")),
+        tabPanel("Gráficos", plotOutput("plot")), 
+        tabPanel("Resumen", verbatimTextOutput("summary")), 
+        tabPanel("Set de Datos", tableOutput("table")),
         tabPanel("Boxplots", plotOutput("boxplot"))
       ),
 	  
   fluidRow(
     column(width = 5,
           div(class = "well",
-               selectInput("xvar", "X-axis variable", axis_vars, selected = "meanfreq"),
-               selectInput("yvar", "Y-axis variable", axis_vars, selected = "median")
+               selectInput("xvar", "Eje X", axis_vars, selected = "meanfreq"),
+               selectInput("yvar", "Eje Y", axis_vars, selected = "median")
           )
     )
   ),
@@ -77,35 +38,34 @@ shinyUI(fluidPage(
                
            ),
            
-           div(class = "well", strong("Options"),
+           div(class = "well", strong("Opciones"),
+               
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_KNN'",
                                 
-                                sliderInput(inputId = "number_neighbours", label = "Number of neighbours:", min = 0, max = 50, value = 3, step = 1),
+                                sliderInput(inputId = "number_neighbours", label = "Número de Vecinos:", min = 0, max = 50, value = 3, step = 1),
                                 tags$hr()
                                 
-                                # Seleccionar mínima cantidad de votos.
-                                # sliderInput(inputId = "minimum_vote", label = "Minimum vote:", min = 0, max = 50, value = 0, step = 1)
                ), 
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_J48'",
                                 
-                                sliderInput(inputId = "threshold_pruning", label = "Confidence threshold for pruning:", min = 0.01, max = 1, value = 0.25, step = 0.01),
-                                sliderInput(inputId = "instances_leaf", label = "Number of instances per leaf:", min = 1, max = 1500, value = 2, step = 1),
+                                sliderInput(inputId = "threshold_pruning", label = "Umbral de confianza:", min = 0.01, max = 1, value = 0.25, step = 0.01),
+                                sliderInput(inputId = "instances_leaf", label = "Número de instancias por hoja:", min = 1, max = 1500, value = 2, step = 1),
                                 tags$hr()
                                 
                ),
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_RandomForest'",
                                 
-                                sliderInput(inputId = "number_trees", label = "Number of trees grown:", min = 1, max = 100, value = 20, step = 1),
+                                sliderInput(inputId = "number_trees", label = "Número de árboles:", min = 1, max = 100, value = 20, step = 1),
                                 tags$hr()
                                 
                ),
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_SVM'",
                                 
-                                selectInput("kernel", "Kernel type",
+                                selectInput("kernel", "Tipo de kernel",
                                             c("Linear" = "linear", 
                                               "Polynomial" = "polynomial",
                                               "Radial basis" = "radial",
@@ -126,14 +86,13 @@ shinyUI(fluidPage(
 		   h4("Clasificador"),
 		   div(class = "well",
 
-               numericInput("instance", label = h4("Introduce una instancia:"), value = 1, min = 1, max = 950)
-               # submitButton("Submit")
+               numericInput("instance", label = h4("Seleccione una instancia:"), value = 1, min = 1, max = 950)
 
            )
     ),
     
     column(width = 9,
-          div(class = "well", strong("Info"),
+          div(class = "well", strong("Información del Algoritmo"),
             verbatimTextOutput("resumen")
           )
            
@@ -141,14 +100,6 @@ shinyUI(fluidPage(
   ),
   #h3("Clasificador"),
   fluidRow(
-  #  column(width = 3,
-   #        div(class = "well",
-
-    #           numericInput("instance", label = h4("Introduce una instancia:"), value = 1, min = 1, max = 950)
-               # submitButton("Submit")
-#
-#           )
- #   ),
     column(width = 12,
            div(class = "well",
 
