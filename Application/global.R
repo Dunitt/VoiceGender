@@ -10,7 +10,7 @@ axis_vars <- c(
   "Interquantile range (in kHz)" = "IQR",
   "Skewness" = "skew",
   "Kurtois" = "kurt",
-  "spectral entropy" = "sp.ent",
+  "Spectral entropy" = "sp.ent",
   "Spectral flatness"= "sfm",
   "Mode frequency" = "mode",
   "Frequency centroid" = "centroid",

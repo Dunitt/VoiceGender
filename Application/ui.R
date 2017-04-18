@@ -13,6 +13,7 @@ library(shinythemes)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
+
   titlePanel("RECONOCIMIENTO DE GÉNERO POR VOZ"), theme = shinytheme("flatly"),
   
   
@@ -48,15 +49,20 @@ shinyUI(fluidPage(
   # Application title
   # titlePanel("Reconocimiento de género por voz"),
   h3("Análisis exploratorio"),
+  
+  tabsetPanel(type = "tabs", 
+        tabPanel("Plot", plotOutput("plot")), 
+        tabPanel("Summary", verbatimTextOutput("summary")), 
+        tabPanel("Table", tableOutput("table")),
+        tabPanel("Boxplots", plotOutput("boxplot"))
+      ),
+	  
   fluidRow(
     column(width = 5,
           div(class = "well",
                selectInput("xvar", "X-axis variable", axis_vars, selected = "meanfreq"),
                selectInput("yvar", "Y-axis variable", axis_vars, selected = "median")
           )
-    ),
-    column(width = 7,
-           ggvisOutput("analysis")
     )
   ),
   
@@ -68,17 +74,6 @@ shinyUI(fluidPage(
                
                radioButtons(inputId="type_algorithms", "Seleccione Algoritmo:", algorithms, selected = "enable_J48")
                
-               # checkboxInput(inputId = "enable_KNN", label = strong("Use KNN"), value = FALSE),
-               # 
-               # checkboxInput(inputId = "enable_J48", label = strong("Use J48"), value = TRUE),
-               # 
-               # checkboxInput(inputId = "enable_RandomForest", label = strong("Use Random Forest"), value = FALSE),
-               # 
-               # checkboxInput(inputId = "enable_SVM", label = strong("Use SVM"), value = FALSE),
-               # 
-               # checkboxInput(inputId = "enable_NaiveBayes", label = strong("Use NaiveBayes"),  value = FALSE),
-               # 
-               # checkboxInput(inputId = "enable_SIN_DEFINIR", label = strong("Use SIN_DEFINIR"), value = FALSE)
                
            ),
            
@@ -126,31 +121,35 @@ shinyUI(fluidPage(
                                 
                )
                
-           )
-    ),
-    
-    column(width = 9,
-          div(class = "well", strong("Graphic"),
-              
-              # conditionalPanel(condition = "input.type_algorithms == 'enable_KNN'",
-                               plotOutput("distPlot")
-              # )
-              
-          )
-           
-    )
-  ),
-  h3("Clasificador"),
-  fluidRow(
-    column(width = 3,
-           div(class = "well",
+           ),
+		   
+		   h4("Clasificador"),
+		   div(class = "well",
 
                numericInput("instance", label = h4("Introduce una instancia:"), value = 1, min = 1, max = 950)
                # submitButton("Submit")
 
            )
     ),
+    
     column(width = 9,
+          div(class = "well", strong("Info"),
+            verbatimTextOutput("resumen")
+          )
+           
+    )
+  ),
+  #h3("Clasificador"),
+  fluidRow(
+  #  column(width = 3,
+   #        div(class = "well",
+
+    #           numericInput("instance", label = h4("Introduce una instancia:"), value = 1, min = 1, max = 950)
+               # submitButton("Submit")
+#
+#           )
+ #   ),
+    column(width = 12,
            div(class = "well",
 
                h2(textOutput("text3")),

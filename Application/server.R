@@ -23,66 +23,76 @@ library(C50)
 library(shinythemes)
 library(ggvis)
 
-setwd("~/Escritorio/VoiceGender")
+#setwd("~/Escritorio/Voicelabel")
 
 # Cargamos la data:
-raw <- read.csv(file = "voice.csv", header = TRUE)
-data <- raw
-
+data <- read.csv(file = "./data/voice.csv", header = TRUE)
+#rm.outlier(data, fill = FALSE, median = FALSE, opposite = FALSE)
+#data <- raw
 # Particionamos el dataset: 70% para entrenamiento y 30% para pruebas (esto se puede modificar para probar la precisión)
-particion <- createDataPartition(y = data$gender, p = 0.7, list = FALSE, times = 1)
+particion <- createDataPartition(y = data$label, p = 0.7, list = FALSE, times = 1)
 dataTraining <- data[particion,]
 dataTest <- data[-particion,]
 dataTestF <- dataTest
-dataTestF$gender <- NULL
+dataTestF$label <- NULL
+cl <- dataTraining$label
+knnTraining <- dataTraining
+knnTraining$label <- NULL
 
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
-  output$distPlot <- renderPlot({
+   output$summary <- renderPrint({
+    summary(data)
+  })
+  
+	output$plot <- renderPlot({
+	x <- data[,input$xvar]
+	y <- data[,input$yvar]
+	plot(x,y,pch=19,col= c("pink", "blue"),xlab=input$xvar, ylab=input$yvar)})
+	
+	output$boxplot <- renderPlot({
+	x <- data[,input$xvar]
+	y <- data[,input$yvar]
+	boxplot(x,y,pch=19,col= c("pink", "blue"),xlab=input$xvar, ylab=input$yvar)})
+	
+	
+	output$table <- renderTable({
+    data})
+	
+	
+  output$resumen <- renderPrint({
   
     if(input$type_algorithms == "enable_KNN"){
-    
-      # print(dataTraining)
-      
-      # # Utilizamos como número de vecinos K=3 para el criterio del algoritmo.
-      cl <- dataTraining$gender
-      knnTraining <- dataTraining
-      knnTraining$gender <- NULL
-      # # En general con l = 3 funciona mejor, pero deja muchos casos sin clasificar.
-      kvecinos.model <- knn(knnTraining, dataTestF, cl, k = 3, l = 0,  prob = TRUE)
-      # # prob <- attr(kvecinos.model, "prob")
-      # # prob <- ifelse(kvecinos.model == "1", prob, 1-prob)
-      # # Obtenemos la matriz de confusión.
-      kvecinos.confusion <- confusionMatrix(table(kvecinos.model, dataTest$gender))
-      # print(kvecinos.model)
-      # # print("PRUEBA")
-      plot(kvecinos.model)
-        
+    	kvecinos <- knn(knnTraining, dataTestF, cl, k = input$number_neighbours, l = 0)
+		A1 <- confusionMatrix(table(kvecinos, dataTest$label))
+		print(A1)
     }
-    # else if(input$type_algorithms == "enable_J48"){
-      
-      # # -C Umbral de confianza para podar. (0.25)
-      # # -M Mínimo de instancias por hoja. (2)
-      # # No tiene mucho sentido asignar a la variable "control"
-      # # los valores que ya se usan por defecto.
-      # arbol <- J48(gender~., dataTraining, control = Weka_control(C = 0.25, M = 2))
-      # # Innecesario porque J48 ya genera una matriz de confusión.
-      # # A2 <- confusionMatrix(table(predict(arbol, dataTestF, type = "class"), dataTest$gender))
-      # # A2$overall[1]
-      # # print("ÁRBOL")
-      # # print(A2$overall)
-      # # print(arbol)
-      # print(summary(arbol))
-      # 
-      # # Para generar una imagen del árbol resultante.
-      # # if (require("party", quietly = TRUE)){
-      #   plot(arbol)
-      # # }
-      
-      
-    # }
+
+	if(input$type_algorithms == "enable_J48"){
+		arbol <- J48(label~., dataTraining, control = Weka_control(C = input$threshold_pruning, M = input$instances_leaf))
+		A2 <- confusionMatrix(table(predict(arbol, dataTestF, type = "class"), dataTest$label))
+		print(A2)		
+    }
+
+	if(input$type_algorithms == "enable_RandomForest"){
+		tree <- randomForest(label~., dataTraining, importance = TRUE, proximity = TRUE,  ntree = input$number_trees, norm.votes = FALSE)
+		A3 <- confusionMatrix(table(predict(tree, dataTestF, type = "class"), dataTest$label))
+		print(A3)
+    }
+    
+	if(input$type_algorithms == "enable_SVM"){
+		svm <- svm(label~., dataTraining, kernel = input$kernel, cost = 62.5, gamma = 0.5, coef0 = 3, degree = 3)
+		A4 <- confusionMatrix(table(predict(svm, dataTestF, type = "class"), dataTest$label))
+		print(A4)
+    }
+
+	if(input$type_algorithms == "enable_NaiveBayes"){
+		naiveBayes<- naiveBayes(label~., dataTraining, laplace = input$laplace)
+		A5 <- confusionMatrix(table(predict(naiveBayes, dataTestF, type = "class"), dataTest$label))
+		print(A5)
+    }
     
     
   })
@@ -93,15 +103,42 @@ shinyServer(function(input, output) {
   
   output$table1 <- renderTable({
     dataTestF[input$instance,]
-  })
+  },width ="auto")
   
   output$text1 <- renderText({
-    # paste("La instancia se clasificó como:", predict(arbol, dataTestF[input$instance,], type = "class"))
+    
+	if(input$type_algorithms == "enable_KNN"){
+		kvecinos <- knn(knnTraining, dataTestF[input$instance,], cl, k = input$number_neighbours, l = 0)
+		paste("La instancia se clasificó como:", kvecinos)
+    }
+
+	else if(input$type_algorithms == "enable_J48"){
+		paste("que mierda pasa")
+		arbol <- J48(label~., dataTraining, control = Weka_control(C = input$threshold_pruning, M = input$instances_leaf))
+		paste("La instancia se clasificó como:", predict(arbol, dataTestF[input$instance,], type = "class"))
+    }
+
+	else if(input$type_algorithms == "enable_RandomForest"){
+		tree <- randomForest(label~., dataTraining, importance = TRUE, proximity = TRUE,  ntree = input$number_trees, norm.votes = FALSE)
+		paste("La instancia se clasificó como:", predict(tree, dataTestF[input$instance,], type = "class"))
+    }
+    
+	else if(input$type_algorithms == "enable_SVM"){
+		svm<- svm(label~., dataTraining, kernel = input$kernel, cost = 62.5, gamma = 0.5, coef0 = 3, degree = 3)
+		paste("La instancia se clasificó como:", predict(svm, dataTestF[input$instance,], type = "class"))
+    }
+
+	else if(input$type_algorithms == "enable_NaiveBayes"){
+		naiveBayes<- naiveBayes(label~., dataTraining, laplace = input$laplace)
+		paste("La instancia se clasificó como:", predict(naiveBayes, dataTestF[input$instance,], type = "class"))
+    }
+
     
   })
   
   output$text2 <- renderText({
-    paste("Y realmente es:", dataTest[input$instance,]$gender)
+    paste("Y realmente es:", dataTest[input$instance,]$label)
   })
   
+   
 })
