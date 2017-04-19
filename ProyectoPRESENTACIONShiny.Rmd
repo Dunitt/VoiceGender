@@ -3,7 +3,7 @@ title: "Proyecto de Mineria de Datos"
 author: "Carlos Castillo, Dunitt Monagas"
 date: "April 18, 2017"
 output: ioslides_presentation
-logo: logo.jpg
+logo: ./img/logo.jpg
 runtime: shiny
 ---
 
