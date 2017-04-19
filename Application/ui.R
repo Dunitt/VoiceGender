@@ -43,7 +43,7 @@ shinyUI(fluidPage(
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_KNN'",
                                 
-                                sliderInput(inputId = "number_neighbours", label = "Número de Vecinos:", min = 0, max = 50, value = 3, step = 1),
+                                sliderInput(inputId = "number_neighbours", label = "Número de Vecinos:", min = 1, max = 50, value = 3, step = 1),
                                 tags$hr()
                                 
                ), 
@@ -77,7 +77,7 @@ shinyUI(fluidPage(
                
                conditionalPanel(condition = "input.type_algorithms == 'enable_NaiveBayes'",
                                 
-                                sliderInput(inputId = "laplace", label = "Laplace:", min = 1, max = 100, value = 0, step = 1)
+                                sliderInput(inputId = "laplace", label = "Laplace:", min = 1, max = 100, value = 3, step = 1)
                                 
                )
                

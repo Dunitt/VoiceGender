@@ -51,7 +51,7 @@ shinyServer(function(input, output) {
 	
 	
   output$resumen <- renderPrint({
-	#Muestra ek resumen adecuado para cada algoritmo
+	#Muestra el resumen adecuado para cada algoritmo
     if(input$type_algorithms == "enable_KNN"){
     	kvecinos <- knn(knnTraining, dataTestF, cl, k = input$number_neighbours, l = 0)
 		A1 <- confusionMatrix(table(kvecinos, dataTest$label))
@@ -101,7 +101,6 @@ shinyServer(function(input, output) {
     }
 
 	else if(input$type_algorithms == "enable_J48"){
-		paste("que mierda pasa")
 		arbol <- J48(label~., dataTraining, control = Weka_control(C = input$threshold_pruning, M = input$instances_leaf))
 		paste("La instancia se clasificó como:", predict(arbol, dataTestF[input$instance,], type = "class"))
     }

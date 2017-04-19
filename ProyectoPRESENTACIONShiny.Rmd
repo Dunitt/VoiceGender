@@ -1,0 +1,184 @@
+---
+title: "Proyecto de Mineria de Datos"
+author: "Carlos Castillo, Dunitt Monagas"
+date: "April 18, 2017"
+output: ioslides_presentation
+logo: logo.jpg
+runtime: shiny
+---
+
+#Voice Gender Recognition
+
+## Introduccion
+
+La voz es uno de los rasgos mas caracteristicos de cada persona, y muchas veces nos permite distinguir el sexo de alguien dadas las caracteristicas acusticas de su voz. Cabria entonces preguntarse: ?Podria una maquina hacer lo mismo con una precision aceptable?
+
+## Problema
+
+Se cuenta con un dataset de entrenamiento para obtener un modelo de clasificacion que permita hacer reconocimiento del sexo dadas las caracteristicas acusticas de la voz adulta.
+
+- El dataset de entrenamiento contiene 3168 instancias y 21 parametros (columnas).
+
+De forma general, cada instancia consiste en un vector caracteristico que contiene 20 parametros.
+
+## Problema (1/2)
+
+Los parametros descritos son:
+  - Frecuencia media (en kHz)
+  - Desviacion estandar de la frecuencia
+  - Frecuencia de la Mediana (en kHz)
+  - Primer cuantil (en kHz)
+  - Tercer cuantil (en kHz)
+  - Rango intercuantil (en kHz)
+  - Oblicuidad
+  - Curtosis
+  - Entropia Espectral
+  - Llanura espectral
+  - Frecuencia Modal
+
+## Problema (2/2)
+  - Centroide de la Frecuencia
+  - Pico de frecuencia
+  - Promedio de la frecuencia fundamental medido a traves de la se?al acustica
+  - Minima frecuencia fundamental medida a traves de la se?al acustica
+  - Maxima frecuencia fundamental medida a traves de la se?al acustica
+  - Promedio de la frecuencia dominante medido a traves de la se?al acustica
+  - Minima frecuencia dominante medida a traves de la se?al acustica
+  - Maxima frecuencia dominante medida a traves de la se?al acustica
+  - Rango de la frecuencia dominante medido a traves de la se?al acustica
+  - Indice de modulacion
+  - Etiqueta
+  
+## Solucion 
+
+Cargamos los paquetes y librerias necesarios para la ejecucion.
+```{r echo=FALSE}
+library(shiny)
+library(rpart.plot)
+library(rmarkdown)
+library(class)
+library(randomForest)
+library(foreach)
+library(caret)
+library(e1071)
+library(rpart)
+library(tree)
+library(RWeka)
+library(party)
+library(C50)
+library(shinythemes)
+library(ggvis)
+```
+
+## 
+
+Creamos una particion del dataset de Entrenamiento, quitandole las clases y usadolo como dataset de Prueba.
+
+##
+
+- Obtenemos los datos
+```{r}
+data = read.csv(file="./data/voice.csv", header=TRUE)
+```
+
+- Particionamos la data en Entrenamiento y Prueba
+```{r}
+particion <- createDataPartition(y = data$label, p = 0.7, list = FALSE, times = 1)
+dataTraining <- data[particion,]
+dataTest <- data[-particion,]
+dataTestF <- dataTest
+dataTestF$label <- NULL
+```
+
+## Tecnicas de Clasificacion
+Probamos diferentes tecnicas para obtener un criterio de escogencia comparandolas en funcion del porcentaje de acierto que arrojaron. 
+
+###Empecemos:
+
+#---------------------------------------K vecinos-------------------------------------
+##K Vecinos
+Utilizamos como numero de vecinos K=3 para el criterio del algoritmo.
+```{r}
+cl <- dataTraining$label
+knnTraining <- dataTraining
+knnTraining$label <- NULL
+kvecinos = knn(knnTraining, dataTestF, cl, k = 3)
+A1 = confusionMatrix(table(kvecinos,dataTest$label))
+```
+Porcentaje de acierto: `r A1$overall[1]`
+
+##K Vecinos
+```{r echo=FALSE}
+A1
+```
+
+#---------------------------------------J48-------------------------------------
+##arbol de decision J48
+El factor de confidencia utilizado es 0.25 y el minimo numero de instancias por hoja es 2.
+```{r}
+arbol <- J48(label~., dataTraining, control = Weka_control(C = 0.25, M = 2))
+A2 <- confusionMatrix(table(predict(arbol, dataTestF, type = "class"), dataTest$label))
+```
+Porcentaje de acierto: `r A2$overall[1]`
+
+##arbol de decision J48
+```{r echo=FALSE}
+A2
+```
+
+#-------------------------------------Random Forest------------------------------------
+##Random Forest (Bosque aleatorio)
+Configuramos el numero maximo de arboles en 20 y su profundidad ilimitada.
+```{r}
+tree <- randomForest(label~., dataTraining, importance = TRUE, proximity = TRUE,  ntree = 20, norm.votes = FALSE)
+A3 <- confusionMatrix(table(predict(tree, dataTestF, type = "class"), dataTest$label))
+
+```
+Porcentaje de acierto: `r A3$overall[1]`
+
+##Random Forest (Bosque aleatorio)
+```{r echo=FALSE}
+A3
+```
+
+#----------------------------------Maquina de Soporte Vectorial---------------------------------
+##Maquina de soporte vectorial (SVM)
+El parametro cost utilizado es 62.5, el gamma para el kernel es 0.5, y la tolerancia del criterio de terminacion (Epsilon) es 0.001
+```{r}
+svm.model <- svm(label~.,dataTraining,cost=62.5,gamma=0.5)
+A4= confusionMatrix(table(predict(svm.model,dataTestF,type="class"),dataTest$label))
+```
+Porcentaje de acierto: `r A4$overall[1]`
+
+##Maquina de soporte vectorial (SVM)
+```{r echo=FALSE}
+A4
+```
+
+#----------------------------------Naive Bayes---------------------------------
+##Naive Bayes
+El parametro de Laplace que utilizamos es 3
+```{r}
+naiveBayes<- naiveBayes(label~., dataTraining, laplace = 3)
+A5 <- confusionMatrix(table(predict(naiveBayes, dataTestF, type = "class"), dataTest$label))
+```
+Porcentaje de acierto: `r A5$overall[1]`
+
+##Naive Bayes
+```{r echo=FALSE}
+A5
+```
+
+## Resultados
+
+Comparamos los 5 escenarios con su respectivo porcentaje de acierto:
+
+Tecnica      	|     Precision   |
+------------ 	|:---------------:|
+K Vecinos    	|`r A1$overall[1]`|
+J48          	|`r A2$overall[1]`|
+Random Forest	|`r A3$overall[1]`|
+SVM          	|`r A4$overall[1]`|
+Naive Bayes  	|`r A5$overall[1]`|
+
+Y preferimos quedarnos con el algoritmo que posee los mejores resultados.
